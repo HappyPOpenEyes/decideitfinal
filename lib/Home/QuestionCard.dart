@@ -374,7 +374,7 @@ class _QuestionCardState extends State<QuestionCard> {
                               prefs.setStringList('searchword', searchlist);
                               Navigator.of(context).push(MaterialPageRoute(
                                   builder: (context) =>
-                                      DIStarProfile(questionuserid)));
+                                      DIStarProfile(questionuserid,1)));
                             }
                           },
                           child: Text(

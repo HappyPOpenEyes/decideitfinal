@@ -98,6 +98,7 @@ class _PostQuestionState extends State<PostQuestion>
   Future<void>? _initializeVideoPlayerFuture;
   File? videoFile;
   final _formKey = GlobalKey<FormState>();
+  final _groupNameformKey = GlobalKey<FormState>();
   List<String> communityname = [];
   List<Categories> categories = [];
   List<Categories> tempcategories = [];
@@ -695,8 +696,6 @@ class _PostQuestionState extends State<PostQuestion>
                                               list = [];
                                               sendoptionslist[0] =
                                                   value ?? false;
-                                              print(value);
-                                              print(sendoptionslist);
                                             });
                                           },
                                         ),
@@ -727,8 +726,6 @@ class _PostQuestionState extends State<PostQuestion>
                                               list = [];
                                               sendoptionslist[1] =
                                                   value ?? false;
-                                              print(value);
-                                              print(sendoptionslist);
                                             });
                                           },
                                         ),
@@ -759,8 +756,6 @@ class _PostQuestionState extends State<PostQuestion>
                                               list = [];
                                               sendoptionslist[2] =
                                                   value ?? false;
-                                              print(value);
-                                              print(sendoptionslist);
                                             });
                                           },
                                         ),
@@ -2465,57 +2460,34 @@ class _PostQuestionState extends State<PostQuestion>
       maxWidth: 800,
     );
     if (cropped != null) {
-      setState(() {
-        optionlist.clear();
-        list.clear();
-        optionlist = [];
-        list = [];
-        _pickedImage = cropped;
-        print('The image has been picked');
-        print(_pickedImage!.path.toString());
-        var fileName = (_pickedImage!.path.split('/').last);
-        var imageextension = fileName.split('.').last;
-        print(imageextension);
-        print('The image file is selected');
-        print(_pickedImage!.path);
+      optionlist.clear();
+      list.clear();
+      optionlist = [];
+      list = [];
+      _pickedImage = cropped;
+      print('The image has been picked');
+      print(_pickedImage!.path.toString());
+      var fileName = (_pickedImage!.path.split('/').last);
+      var imageextension = fileName.split('.').last;
+      print(imageextension);
+      print('The image file is selected');
+      print(_pickedImage!.path);
 
-        String tempextension = imageextension;
-        imageextension = tempextension.toLowerCase();
-        print('The imnageextension is$imageextension');
-        print(providedimageextensions);
+      String tempextension = imageextension;
+      imageextension = tempextension.toLowerCase();
+      print('The imnageextension is$imageextension');
+      print(providedimageextensions);
 
-        if (providedimageextensions.contains(imageextension)) {
-          print('In Post question perfect extensions');
-          var k = 1024;
-          var filesize = File(_pickedImage!.path).lengthSync();
-          var kb = filesize / k;
-          var mb = kb / k;
-          if (mb > 2) {
-            _pickedImage = null;
-            BlurryDialogSingle alert = BlurryDialogSingle(
-                'Error', 'Please choose images of size less than 2MB');
-            showDialog(
-              context: context,
-              builder: (BuildContext context) {
-                var height = MediaQuery.of(context).size.height;
-                var width = MediaQuery.of(context).size.width;
-                return alert;
-              },
-            );
-          } else {
-            _pickedImage = cropped;
-          }
-        } else {
+      if (providedimageextensions.contains(imageextension)) {
+        print('In Post question perfect extensions');
+        var k = 1024;
+        var filesize = File(_pickedImage!.path).lengthSync();
+        var kb = filesize / k;
+        var mb = kb / k;
+        if (mb > 2) {
           _pickedImage = null;
-          print('In Post question other extensions');
-          print(imageextension);
-          String temp = "";
-          for (int i = 0; i < providedimageextensions.length; i++) {
-            temp = "$temp${providedimageextensions[i]} ";
-          }
-          print(temp);
-          BlurryDialogSingle alert = BlurryDialogSingle('Error',
-              'Please choose images with the following extensions: $temp');
+          BlurryDialogSingle alert = BlurryDialogSingle(
+              'Error', 'Please choose images of size less than 2MB');
           showDialog(
             context: context,
             builder: (BuildContext context) {
@@ -2524,8 +2496,31 @@ class _PostQuestionState extends State<PostQuestion>
               return alert;
             },
           );
+        } else {
+          _pickedImage = cropped;
+          imageVideoUrl = null;
         }
-      });
+      } else {
+        _pickedImage = null;
+        print('In Post question other extensions');
+        print(imageextension);
+        String temp = "";
+        for (int i = 0; i < providedimageextensions.length; i++) {
+          temp = "$temp${providedimageextensions[i]} ";
+        }
+        print(temp);
+        BlurryDialogSingle alert = BlurryDialogSingle('Error',
+            'Please choose images with the following extensions: $temp');
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            var height = MediaQuery.of(context).size.height;
+            var width = MediaQuery.of(context).size.width;
+            return alert;
+          },
+        );
+      }
+      setState(() {});
     }
   }
 
@@ -2616,6 +2611,7 @@ class _PostQuestionState extends State<PostQuestion>
             },
           );
         } else {
+          imageVideoUrl = null;
           _controller = VideoPlayerController.file(videoFile!);
 
           // Initialize the controller and store the Future for later use.
@@ -2979,7 +2975,6 @@ class _PostQuestionState extends State<PostQuestion>
     //print(optionslist);
     print(postquestiontojson);
 
-    var imagebody = {'image_video_file': imageorvideo};
     String path = "";
     String name = "";
     if (imageVideoUrl != null) {
@@ -3025,6 +3020,7 @@ class _PostQuestionState extends State<PostQuestion>
       'question_status_id': postquestion_status_id,
       'user_id': userid,
       'question_id': bodydraftquestionid,
+      "image_video_url": imageVideoUrl ?? "",
       "path": path,
       "name": name,
       "image_video": name
@@ -3182,6 +3178,35 @@ class _PostQuestionState extends State<PostQuestion>
       postquestion_status_id = "07e20fda-233a-11eb-b17b-c85b767b9463";
     }
 
+    String path = "";
+    String name = "";
+    if (_pickedImage != null || videoFile != null) {
+      String addimageUrl = '$apiurl/question/fileUpload';
+      Map<String, String> headers = {
+        'Content-Type': 'multipart/form-data',
+        "Authorization": header
+      };
+      var request = http.MultipartRequest('POST', Uri.parse(addimageUrl))
+        ..headers.addAll(headers)
+        ..files.add(await http.MultipartFile.fromPath(
+            'image_video_file', imageorvideo!.path));
+      var imageresponse = await request.send();
+
+      print('Following is the response from image upload');
+      print(imageresponse.statusCode);
+      print(imageresponse.reasonPhrase);
+
+      if (imageresponse.statusCode == 200) {
+        print('Image Upload worked');
+        String convertedresponse = await imageresponse.stream.bytesToString();
+        PostQuestionImageResponse postQuestionImageResponse =
+            postQuestionImageResponseFromJson(convertedresponse);
+        path = postQuestionImageResponse.path;
+        name = postQuestionImageResponse.name;
+        print(path);
+      }
+    }
+
     //print(optionslist);
     print(postquestiontojson);
     var body = {
@@ -3194,12 +3219,13 @@ class _PostQuestionState extends State<PostQuestion>
       'invitees_only_to_me': sendoption1,
       'answer_only_to_me': sendoption2,
       'invitee_can_invite_others': sendoption3,
-      'image_video_file': bytes,
-      'image_video': imageorvideo,
+      'image_video': name,
       'question_option': postquestiontojson,
       'question_id': bodydraftquestionid,
       'send_anonymously': sendpostanonymously,
-      "image_video_url": imageVideoUrl ?? ""
+      "image_video_url": imageVideoUrl ?? "",
+      "path": path,
+      "name": name,
     };
     print(body);
     setState(() {
@@ -3248,55 +3274,56 @@ class _PostQuestionState extends State<PostQuestion>
             shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.all(Radius.circular(10)),
             ),
-            title: Container(
-              child: const Padding(
-                padding: EdgeInsets.all(8.0),
-                child: Text(
-                  'Add Group',
-                  style: TextStyle(color: kBluePrimaryColor),
-                ),
+            title: const Padding(
+              padding: EdgeInsets.all(8.0),
+              child: Text(
+                'Add Group',
+                style: TextStyle(color: kBluePrimaryColor),
               ),
             ),
-            content: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text(
-                  'Group Name',
-                  style: TextStyle(color: Colors.black),
-                ),
-                const SizedBox(
-                  height: 5,
-                ),
-                TextFormField(
-                    //focusNode: questiontextfield,
-                    controller: groupcontroller,
-                    onSaved: (newValue) => groupvalue = newValue!,
-                    onChanged: (value) {
-                      if (value.isNotEmpty) {
-                        removeError(error: 'Please enter the group name');
-                      }
-                    },
-                    validator: (value) {
-                      if (value!.isEmpty) {
-                        questiontextfield.requestFocus();
-                        return 'Please enter the group name';
-                        //addError(error: kNamelNullError);
-                      }
-                    },
-                    decoration: const InputDecoration(
-                        //labelText: "Name",
-                        hintText: 'Enter Group Name',
-                        hintStyle: TextStyle(color: Colors.black),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(
-                            Radius.circular(10.0),
-                          ),
-                        ))
-                    // If  you are using latest version of flutter then lable text and hint text shown like this
-                    // if you r using flutter less then 1.20.* then maybe this is not working properly
-                    ),
-              ],
+            content: Form(
+              key: _groupNameformKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    'Group Name',
+                    style: TextStyle(color: Colors.black),
+                  ),
+                  const SizedBox(
+                    height: 5,
+                  ),
+                  TextFormField(
+                      //focusNode: questiontextfield,
+                      controller: groupcontroller,
+                      onSaved: (newValue) => groupvalue = newValue!,
+                      onChanged: (value) {
+                        if (value.isNotEmpty) {
+                          removeError(error: 'Please enter the group name');
+                        }
+                      },
+                      validator: (value) {
+                        if (value!.isEmpty) {
+                          questiontextfield.requestFocus();
+                          return 'Please enter the group name';
+                          //addError(error: kNamelNullError);
+                        }
+                      },
+                      decoration: const InputDecoration(
+                          //labelText: "Name",
+                          hintText: 'Enter Group Name',
+                          hintStyle: TextStyle(color: Colors.black),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.all(
+                              Radius.circular(10.0),
+                            ),
+                          ))
+                      // If  you are using latest version of flutter then lable text and hint text shown like this
+                      // if you r using flutter less then 1.20.* then maybe this is not working properly
+                      ),
+                ],
+              ),
             ),
             actions: <Widget>[
               Container(
@@ -3305,10 +3332,12 @@ class _PostQuestionState extends State<PostQuestion>
                 alignment: Alignment.center,
                 child: RaisedButton(
                   color: kBluePrimaryColor,
-                  child: const Text("ADD"),
+                  child: const Text(
+                    "ADD",
+                    style: TextStyle(color: kBackgroundColor),
+                  ),
                   onPressed: () {
-                    if (groupcontroller.text.isEmpty) {
-                    } else {
+                    if (_groupNameformKey.currentState!.validate()) {
                       addgroup();
                       Navigator.of(context).pop();
                     }
@@ -3596,7 +3625,6 @@ class _PostQuestionState extends State<PostQuestion>
                             width: 10,
                             child: GestureDetector(
                                 onTap: () {
-                                  print('Removed Community');
                                   removeselectedcommunity(
                                       selectedcommunitieslist[index], index);
                                 },
@@ -3647,8 +3675,6 @@ class _PostQuestionState extends State<PostQuestion>
               data[i].communityQuestionNumberOfInvitations;
         }
       }
-      print(numberofprivateinvitation);
-      print(numberofcommunityinvitation);
       _enabled = false;
       setState(() {});
     }
@@ -3657,11 +3683,7 @@ class _PostQuestionState extends State<PostQuestion>
   void removeselectedcommunity(String selectedcommunity, int index) {
     int tempindex = 0;
     String communitytype = "";
-    print(tempcategories.length);
-    print(selectedcommunity);
     setState(() {
-      print(tempcategories);
-      print(tempcategories.length);
       for (int i = 0; i < tempcategories.length; i++) {
         if (tempcategories[i].name == selectedcommunity) {
           tempindex = i;

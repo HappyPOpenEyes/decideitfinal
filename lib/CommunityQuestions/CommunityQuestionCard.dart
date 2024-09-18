@@ -356,7 +356,7 @@ class _CommunityQuestionCardState extends State<CommunityQuestionCard> {
                             prefs.setStringList('searchword', searchlist);
                             Navigator.of(context).push(MaterialPageRoute(
                                 builder: (context) =>
-                                    DIStarProfile(questionuserid)));
+                                    DIStarProfile(questionuserid,4)));
                           }
                         },
                         child: Text(

@@ -67,7 +67,9 @@ class _MyScrollbarState extends State<MyScrollbar> {
   @override
   void didUpdateWidget(MyScrollbar oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (_scrollController.hasClients) {
     _updateScrollPainter(_scrollController.position);
+    }
   }
 
   @override

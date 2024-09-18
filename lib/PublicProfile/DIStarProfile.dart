@@ -1,3 +1,5 @@
+// ignore_for_file: library_private_types_in_public_api
+
 import 'dart:convert';
 import 'dart:io';
 import 'package:decideitfinal/CommunityQuestions/CommunityQuestion.dart';
@@ -16,13 +18,15 @@ import 'package:http/http.dart' as http;
 import 'package:shimmer/shimmer.dart';
 
 class DIStarProfile extends StatefulWidget {
-  var questionuserid;
+  var questionuserid, sourcecount;
 
-  DIStarProfile(questionuserid) {
+  DIStarProfile(questionuserid, this.sourcecount, {Key? key})
+      : super(key: key) {
     this.questionuserid = questionuserid;
   }
   @override
-  _DIStarProfileState createState() => _DIStarProfileState(questionuserid);
+  _DIStarProfileState createState() =>
+      _DIStarProfileState(questionuserid, sourcecount);
   //
 }
 
@@ -35,10 +39,9 @@ class _DIStarProfileState extends State<DIStarProfile>
 
   List<String> searchlist = [];
 
-  _DIStarProfileState(this.questionuserid);
+  _DIStarProfileState(this.questionuserid, this.sourcecount);
   late TabController _tabController;
   int _selectedTabbar = 0;
-  final _formKey = GlobalKey<FormState>();
   List<String> topquestionid = [];
   List<String> topquestionslist = [];
   List<String> topquestionimageurl = [];
@@ -95,16 +98,13 @@ class _DIStarProfileState extends State<DIStarProfile>
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-    print(questionuserid);
     getuserdata();
     _tabController = TabController(length: 2, vsync: this);
   }
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
     return Scaffold(
         key: _scaffoldkey,
         appBar: AppBar(
@@ -115,44 +115,43 @@ class _DIStarProfileState extends State<DIStarProfile>
           centerTitle: true,
           leading: GestureDetector(
               onTap: () async {
-                print('Back button presses');
+                // if (sourcelist.isNotEmpty) {
+                //   sourcecount = sourcelist[sourcelist.length - 1];
+                // }
 
-                sourcecount = sourcelist[sourcelist.length - 1];
-                if (sourcelist.length != 1) {
-                  searchword = searchlist[searchlist.length - 2];
-                  sourcelist.removeLast();
-                  searchlist.removeLast();
-                  SharedPreferences prefs =
-                      await SharedPreferences.getInstance();
-                  prefs.setStringList('communitysource', sourcelist);
-                  prefs.setStringList('searchword', searchlist);
-                } else {
-                  searchword = searchlist[searchlist.length - 1];
-                  SharedPreferences prefs =
-                      await SharedPreferences.getInstance();
-                  prefs.remove('communitysource');
-                  prefs.remove('searchword');
-                }
-                print('After');
-                print(sourcecount);
-                if (sourcecount == '1') {
-                  Navigator.of(context).push(
+                // if (sourcelist.length != 1) {
+                //   searchword = searchlist[searchlist.length - 2];
+                //   sourcelist.removeLast();
+                //   searchlist.removeLast();
+                //   SharedPreferences prefs =
+                //       await SharedPreferences.getInstance();
+                //   prefs.setStringList('communitysource', sourcelist);
+                //   prefs.setStringList('searchword', searchlist);
+                // } else {
+                //   searchword = searchlist[searchlist.length - 1];
+                //   SharedPreferences prefs =
+                //       await SharedPreferences.getInstance();
+                //   prefs.remove('communitysource');
+                //   prefs.remove('searchword');
+                // }
+                if (sourcecount == 1) {
+                  Navigator.of(context).pushReplacement(
                       MaterialPageRoute(builder: (context) => HomeScreen()));
                 } /*else if (sourcecount == 2) {
                 Navigator.of(context).push(MaterialPageRoute(
                     builder: (context) => GlobalSearch(searchword)));
               }*/
-                else if (sourcecount == '3') {
-                  Navigator.of(context).push(
+                else if (sourcecount == 3) {
+                  Navigator.of(context).pushReplacement(
                       MaterialPageRoute(builder: (context) => Dashboard()));
-                } else if (sourcecount == '4') {
-                  Navigator.of(context).push(MaterialPageRoute(
+                } else if (sourcecount == 4) {
+                  Navigator.of(context).pushReplacement(MaterialPageRoute(
                       builder: (context) => CommunityQuestion(searchword)));
-                } else if (sourcecount == '5') {
-                  Navigator.of(context)
-                      .push(MaterialPageRoute(builder: (context) => DIStars()));
-                } else if (sourcecount == '6') {
-                  Navigator.of(context).push(MaterialPageRoute(
+                } else if (sourcecount == 5) {
+                  Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(builder: (context) => DIStars()));
+                } else if (sourcecount == 6) {
+                  Navigator.of(context).pushReplacement(MaterialPageRoute(
                       builder: (context) => QuestionDetail(searchword)));
                 }
               },
@@ -261,8 +260,7 @@ class _DIStarProfileState extends State<DIStarProfile>
                                                   child: Text(
                                                     isprofileprivate == 0
                                                         ? 'Display Name'
-                                                        : isprofileprivate ==
-                                                                0
+                                                        : isprofileprivate == 0
                                                             ? username
                                                             : randomname,
                                                     style: const TextStyle(
@@ -270,8 +268,7 @@ class _DIStarProfileState extends State<DIStarProfile>
                                                         color: Colors.white,
                                                         fontWeight:
                                                             FontWeight.bold,
-                                                        fontFamily:
-                                                            'Calibri'),
+                                                        fontFamily: 'Calibri'),
                                                   ),
                                                 ),
                                                 const SizedBox(
@@ -368,11 +365,12 @@ class _DIStarProfileState extends State<DIStarProfile>
                                                             8.0),
                                                     child: DecoratedBox(
                                                       decoration: ShapeDecoration(
-                                                          shape: const CircleBorder(),
+                                                          shape:
+                                                              const CircleBorder(),
                                                           image: DecorationImage(
-                                                            fit: BoxFit.cover,
-                                                            image: showImage()
-                                                          )),
+                                                              fit: BoxFit.cover,
+                                                              image:
+                                                                  showImage())),
                                                     ),
                                                   ),
                                                 ),
@@ -393,8 +391,7 @@ class _DIStarProfileState extends State<DIStarProfile>
                                                         color: Colors.white,
                                                         fontWeight:
                                                             FontWeight.bold,
-                                                        fontFamily:
-                                                            'Calibri'),
+                                                        fontFamily: 'Calibri'),
                                                   ),
                                                 ),
                                                 const SizedBox(
@@ -523,8 +520,6 @@ class _DIStarProfileState extends State<DIStarProfile>
                                       labelColor: kBluePrimaryColor,
                                       unselectedLabelColor: Colors.grey,
                                       onTap: (index) {
-                                        print('Index');
-                                        print(index);
                                         setState(() {
                                           _selectedTabbar = index;
                                           _enabledquestions = true;
@@ -533,11 +528,11 @@ class _DIStarProfileState extends State<DIStarProfile>
                                         });
                                       },
                                       controller: _tabController,
-                                      tabs: [
-                                        const Tab(
+                                      tabs: const [
+                                        Tab(
                                           text: 'Top',
                                         ),
-                                        const Tab(
+                                        Tab(
                                           text: 'New',
                                         ),
                                       ],
@@ -564,15 +559,13 @@ class _DIStarProfileState extends State<DIStarProfile>
       sourcelist = sharedsourcelist;
       searchlist = sharedsearchlist ?? [];
     }
+    email = sharedemail;
+    userid = shareduserid;
+    imageurl = sharedimageurl;
+    name = sharedname;
+    header = sharedtoken;
 
-    setState(() {
-      email = sharedemail;
-      userid = shareduserid;
-      imageurl = sharedimageurl;
-      name = sharedname;
-      header = sharedtoken;
-      getpublicprofiledata();
-    });
+    getpublicprofiledata();
     print('coming from shared preference $email$userid$name');
   }
 
@@ -623,78 +616,112 @@ class _DIStarProfileState extends State<DIStarProfile>
                       );
                     }),
               ))
-          : Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ListView.builder(
-                scrollDirection: Axis.vertical,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: topquestioncomments.length,
-                itemBuilder: (context, index) {
-                  var communitynames = [];
-                  var communityids = [];
-                  if (topquestioncommunity[index].contains(',')) {
-                    final split = topquestioncommunity[index].split(',');
-                    final Map<int, String> values = {
-                      for (int i = 0; i < split.length; i++) i: split[i]
-                    };
-                    final splitid = topquestioncommunityid[index].split(',');
-                    final Map<int, String> valuesid = {
-                      for (int i = 0; i < splitid.length; i++) i: splitid[i]
-                    };
-                    for (int i = 0; i < valuesid.length; i++) {
-                      String trimmedvalue = valuesid[i]!.trim();
-                      if (i + 1 != valuesid.length) {
-                        communityids.add('$trimmedvalue, ');
+          : topquestioncomments.isEmpty
+              ? Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Card(
+                      shape: const RoundedRectangleBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(20))),
+                      color: kBackgroundColor,
+                      child: Column(
+                        children: [
+                          Image.asset(
+                            'images/no_found.png',
+                            fit: BoxFit.cover,
+                          ),
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          const Text(
+                            'No Questions Found For Your Selection',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18,
+                                color: kBluePrimaryColor),
+                          ),
+                          const SizedBox(
+                            height: 15,
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                )
+              : Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ListView.builder(
+                    scrollDirection: Axis.vertical,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: topquestioncomments.length,
+                    itemBuilder: (context, index) {
+                      var communitynames = [];
+                      var communityids = [];
+                      if (topquestioncommunity[index].contains(',')) {
+                        final split = topquestioncommunity[index].split(',');
+                        final Map<int, String> values = {
+                          for (int i = 0; i < split.length; i++) i: split[i]
+                        };
+                        final splitid =
+                            topquestioncommunityid[index].split(',');
+                        final Map<int, String> valuesid = {
+                          for (int i = 0; i < splitid.length; i++) i: splitid[i]
+                        };
+                        for (int i = 0; i < valuesid.length; i++) {
+                          String trimmedvalue = valuesid[i]!.trim();
+                          if (i + 1 != valuesid.length) {
+                            communityids.add('$trimmedvalue, ');
+                          } else {
+                            communityids.add(trimmedvalue);
+                          }
+                        }
+                        for (int i = 0; i < values.length; i++) {
+                          String trimmedvalue = values[i]!.trim();
+                          if (i + 1 != values.length) {
+                            communitynames.add('$trimmedvalue, ');
+                          } else {
+                            communitynames.add(trimmedvalue);
+                          }
+                        }
                       } else {
-                        communityids.add(trimmedvalue);
+                        communitynames.add(topquestioncommunity[index]);
+                        communityids.add(topquestioncommunityid[index]);
                       }
-                    }
-                    for (int i = 0; i < values.length; i++) {
-                      String trimmedvalue = values[i]!.trim();
-                      if (i + 1 != values.length) {
-                        communitynames.add('$trimmedvalue, ');
-                      } else {
-                        communitynames.add(trimmedvalue);
-                      }
-                    }
-                  } else {
-                    communitynames.add(topquestioncommunity[index]);
-                    communityids.add(topquestioncommunityid[index]);
-                  }
-                  return Column(
-                    children: [
-                      QuestionCard(
-                          topquestionslist[index],
-                          topquestionprofileimageurl[index],
-                          topquestionusername[index],
-                          communitynames,
-                          topquestionpostedtime[index],
-                          topquestionexpiringtitle[index],
-                          topquestionexpiringtime[index],
-                          topquestionviews[index].toString(),
-                          topquestioncomments[index].toString(),
-                          topquestionimageurl[index],
-                          topquestionfileextension[index],
-                          topquestionid[index],
-                          communityids,
-                          topquestionlikescount[index],
-                          topquestionisliked[index],
-                          topquestionisreported[index],
-                          topquestionreportedname[index],
-                          header,
-                          name,
-                          topquestionuserid[index],
-                          5,
-                          questionuserid),
-                      const SizedBox(
-                        height: 5,
-                      )
-                    ],
-                  );
-                },
-              ),
-            );
+                      return Column(
+                        children: [
+                          QuestionCard(
+                              topquestionslist[index],
+                              topquestionprofileimageurl[index],
+                              topquestionusername[index],
+                              communitynames,
+                              topquestionpostedtime[index],
+                              topquestionexpiringtitle[index],
+                              topquestionexpiringtime[index],
+                              topquestionviews[index].toString(),
+                              topquestioncomments[index].toString(),
+                              topquestionimageurl[index],
+                              topquestionfileextension[index],
+                              topquestionid[index],
+                              communityids,
+                              topquestionlikescount[index],
+                              topquestionisliked[index],
+                              topquestionisreported[index],
+                              topquestionreportedname[index],
+                              header,
+                              name,
+                              topquestionuserid[index],
+                              5,
+                              questionuserid),
+                          const SizedBox(
+                            height: 5,
+                          )
+                        ],
+                      );
+                    },
+                  ),
+                );
     } else {
       return _enabledquestions
           ? Shimmer.fromColors(
@@ -741,78 +768,112 @@ class _DIStarProfileState extends State<DIStarProfile>
                       );
                     }),
               ))
-          : Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ListView.builder(
-                scrollDirection: Axis.vertical,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: topquestioncomments.length,
-                itemBuilder: (context, index) {
-                  var communitynames = [];
-                  var communityids = [];
-                  if (topquestioncommunity[index].contains(',')) {
-                    final split = topquestioncommunity[index].split(',');
-                    final Map<int, String> values = {
-                      for (int i = 0; i < split.length; i++) i: split[i]
-                    };
-                    final splitid = topquestioncommunityid[index].split(',');
-                    final Map<int, String> valuesid = {
-                      for (int i = 0; i < splitid.length; i++) i: splitid[i]
-                    };
-                    for (int i = 0; i < valuesid.length; i++) {
-                      String trimmedvalue = valuesid[i]!.trim();
-                      if (i + 1 != valuesid.length) {
-                        communityids.add('$trimmedvalue, ');
+          : newquestioncomments.isEmpty
+              ? Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Card(
+                      shape: const RoundedRectangleBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(20))),
+                      color: kBackgroundColor,
+                      child: Column(
+                        children: [
+                          Image.asset(
+                            'images/no_found.png',
+                            fit: BoxFit.cover,
+                          ),
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          const Text(
+                            'No Questions Found For Your Selection',
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18,
+                                color: kBluePrimaryColor),
+                          ),
+                          const SizedBox(
+                            height: 15,
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                )
+              : Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ListView.builder(
+                    scrollDirection: Axis.vertical,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: newquestioncomments.length,
+                    itemBuilder: (context, index) {
+                      var communitynames = [];
+                      var communityids = [];
+                      if (newquestioncommunity[index].contains(',')) {
+                        final split = newquestioncommunity[index].split(',');
+                        final Map<int, String> values = {
+                          for (int i = 0; i < split.length; i++) i: split[i]
+                        };
+                        final splitid =
+                            newquestioncommunityid[index].split(',');
+                        final Map<int, String> valuesid = {
+                          for (int i = 0; i < splitid.length; i++) i: splitid[i]
+                        };
+                        for (int i = 0; i < valuesid.length; i++) {
+                          String trimmedvalue = valuesid[i]!.trim();
+                          if (i + 1 != valuesid.length) {
+                            communityids.add('$trimmedvalue, ');
+                          } else {
+                            communityids.add(trimmedvalue);
+                          }
+                        }
+                        for (int i = 0; i < values.length; i++) {
+                          String trimmedvalue = values[i]!.trim();
+                          if (i + 1 != values.length) {
+                            communitynames.add('$trimmedvalue, ');
+                          } else {
+                            communitynames.add(trimmedvalue);
+                          }
+                        }
                       } else {
-                        communityids.add(trimmedvalue);
+                        communitynames.add(newquestioncommunity[index]);
+                        communityids.add(newquestioncommunityid[index]);
                       }
-                    }
-                    for (int i = 0; i < values.length; i++) {
-                      String trimmedvalue = values[i]!.trim();
-                      if (i + 1 != values.length) {
-                        communitynames.add('$trimmedvalue, ');
-                      } else {
-                        communitynames.add(trimmedvalue);
-                      }
-                    }
-                  } else {
-                    communitynames.add(newquestioncommunity[index]);
-                    communityids.add(newquestioncommunityid[index]);
-                  }
-                  return Column(
-                    children: [
-                      QuestionCard(
-                          newquestionslist[index],
-                          newquestionprofileimageurl[index],
-                          newquestionusername[index],
-                          communitynames,
-                          newquestionpostedtime[index],
-                          newquestionexpiringtitle[index],
-                          newquestionexpiringtime[index],
-                          newquestionviews[index].toString(),
-                          newquestioncomments[index].toString(),
-                          newquestionimageurl[index],
-                          newquestionfileextension[index],
-                          newquestionid[index],
-                          communityids,
-                          newquestionlikescount[index],
-                          newquestionisliked[index],
-                          newquestionisreported[index],
-                          newquestionreportedname[index],
-                          header,
-                          name,
-                          newquestionuserid[index],
-                          5,
-                          questionuserid),
-                      const SizedBox(
-                        height: 5,
-                      )
-                    ],
-                  );
-                },
-              ),
-            );
+                      return Column(
+                        children: [
+                          QuestionCard(
+                              newquestionslist[index],
+                              newquestionprofileimageurl[index],
+                              newquestionusername[index],
+                              communitynames,
+                              newquestionpostedtime[index],
+                              newquestionexpiringtitle[index],
+                              newquestionexpiringtime[index],
+                              newquestionviews[index].toString(),
+                              newquestioncomments[index].toString(),
+                              newquestionimageurl[index],
+                              newquestionfileextension[index],
+                              newquestionid[index],
+                              communityids,
+                              newquestionlikescount[index],
+                              newquestionisliked[index],
+                              newquestionisreported[index],
+                              newquestionreportedname[index],
+                              header,
+                              name,
+                              newquestionuserid[index],
+                              5,
+                              questionuserid),
+                          const SizedBox(
+                            height: 5,
+                          )
+                        ],
+                      );
+                    },
+                  ),
+                );
     }
   }
 
@@ -823,13 +884,10 @@ class _DIStarProfileState extends State<DIStarProfile>
         headers: {"Content-Type": "application/json", "Authorization": header},
         encoding: Encoding.getByName("utf-8"));
 
-    print(questionuserid);
-    print(body);
-
     if (response.statusCode == 200) {
       PublicProfile publicProfile = publicProfileFromJson(response.body);
       isprofileprivate = publicProfile.isProfilePrivate;
-      userbio = publicProfile.userProfile;
+      userbio = publicProfile.userProfile ?? "";
       username = publicProfile.userName;
       randomname = publicProfile.randomName;
       profileimageurl = publicProfile.profileImageUrl ?? "";
@@ -846,9 +904,6 @@ class _DIStarProfileState extends State<DIStarProfile>
           _enabledquestions = false;
         });
       }
-    } else {
-      print(response.statusCode);
-      print(response.body);
     }
   }
 
@@ -858,6 +913,7 @@ class _DIStarProfileState extends State<DIStarProfile>
         body: json.encode(body),
         headers: {"Content-Type": "application/json", "Authorization": header},
         encoding: Encoding.getByName("utf-8"));
+    print(response.body);
     if (response.statusCode == 200) {
       HomeData homeData = homeDataFromJson(response.body);
       List<Question> topquestion = homeData.topQuestions;
@@ -930,9 +986,6 @@ class _DIStarProfileState extends State<DIStarProfile>
       setState(() {
         _enabledquestions = false;
       });
-    } else {
-      print(response.statusCode);
-      print(response.body);
     }
   }
 
@@ -978,6 +1031,4 @@ class _DIStarProfileState extends State<DIStarProfile>
         ? const AssetImage('images/user.jpg')
         : NetworkImage('$imageapiurl/$profileimageurl');
   }
-  
-  
 }

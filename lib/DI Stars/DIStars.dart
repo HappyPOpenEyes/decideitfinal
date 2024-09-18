@@ -162,7 +162,7 @@ class _DIStarsState extends State<DIStars> {
                         child: Wrap(
                           children: [
                         for (var i in counter)
-                          DIStarCard('', '', 30, 30, '', ''),
+                          DIStarCard("", '', 30, 30, '', ''),
                           ],
                         ))
                     : Container(
@@ -189,7 +189,6 @@ class _DIStarsState extends State<DIStars> {
         },
         encoding: Encoding.getByName("utf-8"));
 
-    print(response.body);
     if (response.statusCode == 200) {
       DiStarJson diStarJson = diStarJsonFromJson(response.body);
       List<Datum> data = diStarJson.data;
@@ -200,9 +199,7 @@ class _DIStarsState extends State<DIStars> {
         activequestioncount.add(data[i].activeQuestionsCount);
         profileimagelist.add(data[i].profileImageUrl ?? "");
       }
-    } else {
-      print(response.statusCode);
-    }
+    } 
     setState(() {
       _isInAsyncCall = false;
       _enabled = false;
@@ -214,19 +211,16 @@ class _DIStarsState extends State<DIStars> {
       list.add(const Text('There are no DI Stars yet.!!'));
     } else {
       for (int i = 0; i < username.length; i++) {
-        print('List of usrename: ' + username.toString());
         list.add(GestureDetector(
           onTap: () {
-            print('View Profile');
             Navigator.of(context).pushReplacement(MaterialPageRoute(
-                builder: (context) => DIStarProfile(userid[i])));
+                builder: (context) => DIStarProfile(userid[i],5)));
           },
           child: DIStarCard(profileimagelist[i], username[i], questioncount[i],
               activequestioncount[i], userid[i], header),
         ));
       }
     }
-    //print('List of usrename: ' + username.toString());
     if (list.length - username.length >= 1) {
       list.removeAt(0);
     }

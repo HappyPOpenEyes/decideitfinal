@@ -515,7 +515,6 @@ class _SignupState extends State<Signup> {
           _isInAsyncCall = false;
         });
         if (mobile.isNotEmpty) {
-          print('Mobile no is entered');
           setuserdetails();
           OTPDialog alert = OTPDialog('Verify OTP',
               'Enter your OTP to verify your mobile number', "", mobile, 2);
@@ -528,7 +527,6 @@ class _SignupState extends State<Signup> {
             },
           );
         } else {
-          print('Register');
           setuserdetails();
           Navigator.of(context)
               .push(MaterialPageRoute(builder: (context) => LoginScreen()));
@@ -543,7 +541,6 @@ class _SignupState extends State<Signup> {
       }
       
     } else {
-      print('Errrrrooooooorrr');
       BlurryDialogSingle alert = BlurryDialogSingle("Error",
           "Please read and accept privacy policy and terms and conditions.");
       showDialog(

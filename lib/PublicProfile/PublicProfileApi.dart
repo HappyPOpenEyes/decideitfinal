@@ -57,7 +57,7 @@ class PublicProfile {
     String randomName;
     String password;
     String? profileImageUrl;
-    String userProfile;
+    String? userProfile;
     dynamic forgetPasswordCode;
     int forceChangePassword;
     int displayName;

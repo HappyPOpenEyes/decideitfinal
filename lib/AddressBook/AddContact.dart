@@ -12,33 +12,41 @@ import '../PostQuestion/InvalidGroupNameAPI.dart';
 import 'AddContactValidAPI.dart';
 
 class AddContact extends StatefulWidget {
-  late String contactname, contactemail, contactphone, contactisactive, contactid;
+  late String contactname,
+      contactemail,
+      contactphone,
+      contactisactive,
+      contactid;
   late int flag, id;
 
-  AddContact(this.contactname, this.contactemail, this.contactphone, this.contactisactive,
-      this.contactid, this.flag, this.id);
+  AddContact(this.contactname, this.contactemail, this.contactphone,
+      this.contactisactive, this.contactid, this.flag, this.id);
   @override
   _AddContactState createState() => _AddContactState(contactname, contactemail,
       contactphone, contactisactive, contactid, flag, id);
 }
 
 class _AddContactState extends State<AddContact> {
-  late String contactname, contactemail, contactphone, contactisactive, contactid;
+  late String contactname,
+      contactemail,
+      contactphone,
+      contactisactive,
+      contactid;
   late int flag, id;
   var header, userid, name, email, imageurl;
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
-  TextEditingController addcontactfirstname = new TextEditingController();
-  TextEditingController addcontactlastname = new TextEditingController();
-  TextEditingController addcontactemail = new TextEditingController();
-  TextEditingController addcontactphone = new TextEditingController();
+  TextEditingController addcontactfirstname = TextEditingController();
+  TextEditingController addcontactlastname = TextEditingController();
+  TextEditingController addcontactemail = TextEditingController();
+  TextEditingController addcontactphone = TextEditingController();
   bool addcontactisSelected = true;
   final _formKey = GlobalKey<FormState>();
   final List<String> errors = [];
   bool _enabled = false;
   AppBar appbar = AppBar();
 
-  _AddContactState(this.contactname, this.contactemail, this.contactphone, this.contactisactive,
-      this.contactid, this.flag, this.id);
+  _AddContactState(this.contactname, this.contactemail, this.contactphone,
+      this.contactisactive, this.contactid, this.flag, this.id);
 
   @override
   void initState() {
@@ -79,15 +87,25 @@ class _AddContactState extends State<AddContact> {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
-        automaticallyImplyLeading: true,
-        title: SizedBox(
-            height: appbar.preferredSize.height * 0.8,
-            child: Image.asset('logos/DI_Logo.png')),
-        centerTitle: true,
+        automaticallyImplyLeading: false,
+        title: Row(
+          children: [
+            InkWell(
+                onTap: () {
+                  Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(builder: (context) => AddressBook(id)));
+                },
+                child: const Icon(Icons.arrow_back_ios)),
+            const Spacer(),
+            SizedBox(
+                height: appbar.preferredSize.height * 0.8,
+                child: Image.asset('logos/DI_Logo.png')),
+            const Spacer(),
+          ],
+        ),
         backgroundColor: kBluePrimaryColor,
       ),
       body: ModalProgressHUD(
@@ -114,18 +132,16 @@ class _AddContactState extends State<AddContact> {
                               style: TextStyle(
                                   color: kBluePrimaryColor,
                                   fontSize:
-                                      MediaQuery.of(context).size.height *
-                                          0.02,
+                                      MediaQuery.of(context).size.height * 0.02,
                                   fontWeight: FontWeight.bold),
                               children: <TextSpan>[
                                 TextSpan(
                                     text: 'Address Book',
                                     style: TextStyle(
                                         color: kOrangePrimaryColor,
-                                        fontSize: MediaQuery.of(context)
-                                                .size
-                                                .height *
-                                            0.02,
+                                        fontSize:
+                                            MediaQuery.of(context).size.height *
+                                                0.02,
                                         fontWeight: FontWeight.bold)),
                               ],
                             ),
@@ -235,10 +251,10 @@ class _AddContactState extends State<AddContact> {
         decoration: const InputDecoration(
             //labelText: "Name",
             hintText: 'First name',
-            hintStyle:  TextStyle(color: Colors.black),
-            border:  OutlineInputBorder(
-              borderRadius:  BorderRadius.all(
-                 Radius.circular(10.0),
+            hintStyle: TextStyle(color: Colors.black),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.all(
+                Radius.circular(10.0),
               ),
             )));
   }
@@ -263,9 +279,9 @@ class _AddContactState extends State<AddContact> {
             //labelText: "Name",
             hintText: 'Last name',
             hintStyle: TextStyle(color: Colors.black),
-            border:  OutlineInputBorder(
-              borderRadius:  BorderRadius.all(
-                 Radius.circular(10.0),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.all(
+                Radius.circular(10.0),
               ),
             )));
   }
@@ -280,7 +296,6 @@ class _AddContactState extends State<AddContact> {
         } else if (emailValidatorRegExp.hasMatch(value)) {
           removeError(error: kInvalidEmailError);
         }
-
       },
       validator: (value) {
         if (value!.isEmpty) {
@@ -300,9 +315,9 @@ class _AddContactState extends State<AddContact> {
           // If  you are using latest version of flutter then lable text and hint text shown like this
           // if you r using flutter less then 1.20.* then maybe this is not working properly
           //floatingLabelBehavior: FloatingLabelBehavior.always,
-          border:  OutlineInputBorder(
-            borderRadius:  BorderRadius.all(
-               Radius.circular(10.0),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.all(
+              Radius.circular(10.0),
             ),
           )),
     );
@@ -321,7 +336,6 @@ class _AddContactState extends State<AddContact> {
         if ((value!.isNotEmpty && value.length != 10)) {
           return kPhoneNumberLengthError;
         }
-
       },
       decoration: const InputDecoration(
           hintText: "Phone Number",
@@ -329,9 +343,9 @@ class _AddContactState extends State<AddContact> {
           // If  you are using latest version of flutter then lable text and hint text shown like this
           // if you r using flutter less then 1.20.* then maybe this is not working properly
           //floatingLabelBehavior: FloatingLabelBehavior.always,
-          border:  OutlineInputBorder(
-            borderRadius:   BorderRadius.all(
-               Radius.circular(10.0),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.all(
+              Radius.circular(10.0),
             ),
           )),
     );
@@ -368,8 +382,8 @@ class _AddContactState extends State<AddContact> {
         _enabled = false;
       });
       print(id);
-      Navigator.of(context)
-          .pushReplacement(MaterialPageRoute(builder: (context) => AddressBook(id)));
+      Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => AddressBook(id)));
       getuserdetails();
     } else {
       InvalidGroupNameAPI invalidGroupNameAPI =
@@ -443,8 +457,8 @@ class _AddContactState extends State<AddContact> {
         _enabled = false;
       });
       print(id);
-      Navigator.of(context)
-          .pushReplacement(MaterialPageRoute(builder: (context) => AddressBook(id)));
+      Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => AddressBook(id)));
       getuserdetails();
     } else {
       InvalidGroupNameAPI invalidGroupNameAPI =

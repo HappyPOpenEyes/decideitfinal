@@ -240,7 +240,7 @@ class _QuestionDetailState extends State<QuestionDetail>
                     builder: (context) => CommunityQuestion(searchword)));
               } else if (sourceoption == '5') {
                 Navigator.of(context).pushReplacement(MaterialPageRoute(
-                    builder: (context) => DIStarProfile(searchword)));
+                    builder: (context) => DIStarProfile(searchword,6)));
               }
             },
             child: const Icon(Icons.arrow_back_ios)),
@@ -413,7 +413,7 @@ class _QuestionDetailState extends State<QuestionDetail>
                                         ),
                                       )
                                     : chewieController != null
-                                        ? Container(
+                                        ? SizedBox(
                                             height: 240,
                                             child: Chewie(
                                               controller: chewieController!,
@@ -2735,8 +2735,8 @@ class _QuestionDetailState extends State<QuestionDetail>
         prefs.setString('AnswerValue', answer.toString());
         print('In RankedList');
       }
-      Navigator.of(context)
-          .pushReplacement(MaterialPageRoute(builder: (context) => LoginScreen()));
+      Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => LoginScreen()));
     } else {
       if (postanonymously) {
         sendannonymously = sendoptionid;
@@ -2982,9 +2982,10 @@ class _QuestionDetailState extends State<QuestionDetail>
                               prefs.setStringList(
                                   'communitysource', sourcelist);
                               prefs.setStringList('searchword', searchlist);
-                              Navigator.of(context).pushReplacement(MaterialPageRoute(
-                                  builder: (context) => CommunityQuestion(
-                                      communityidlist[index])));
+                              Navigator.of(context).pushReplacement(
+                                  MaterialPageRoute(
+                                      builder: (context) => CommunityQuestion(
+                                          communityidlist[index])));
                             },
                             child: Text(communitylist[index],
                                 style: TextStyle(
@@ -3205,10 +3206,13 @@ class _QuestionDetailState extends State<QuestionDetail>
                           ),
                         ),
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                          child: Text(
-                            i.toString(),
-                            style: const TextStyle(fontSize: 16),
+                          padding: const EdgeInsets.only(left: 12.0, right: 4),
+                          child: SizedBox(
+                            width: MediaQuery.of(context).size.width * 0.55,
+                            child: Text(
+                              i.toString(),
+                              style: const TextStyle(fontSize: 14),
+                            ),
                           ),
                         ),
                       ],
@@ -3435,42 +3439,44 @@ class _QuestionDetailState extends State<QuestionDetail>
               ),
             ],
           ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              expireTitle != "Expired:" && numberofinvitation != 0
-                  ? owneruserid == userid
-                      ? displayaddinvitees()
-                      : inviteecaninviteothers != "0"
-                          ? displayaddinvitees()
-                          : const Padding(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text(
-                                'You can not send more invitations for this question.',
-                                style: TextStyle(fontSize: 14),
-                              ),
-                            )
-                  : const Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: Text(
-                        'You can not send more invitations for this question.',
-                        style: TextStyle(fontSize: 14),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                expireTitle != "Expired:" && numberofinvitation != 0
+                    ? owneruserid == userid
+                        ? displayaddinvitees()
+                        : inviteecaninviteothers != "0"
+                            ? displayaddinvitees()
+                            : const Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: Text(
+                                  'You can not send more invitations for this question.',
+                                  style: TextStyle(fontSize: 14),
+                                ),
+                              )
+                    : const Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: Text(
+                          'You can not send more invitations for this question.',
+                          style: TextStyle(fontSize: 14),
+                        ),
                       ),
-                    ),
-              inviteesonlytome != "0"
-                  ? owneruserid == userid
-                      ? displayinvitename()
-                      : const SizedBox()
-                  : displayinvitename(),
-              /*Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  for (var i in inviteeslist)
-                    Text('This is listview' + i.toString())
-                ],
-              ),*/
-            ],
+                inviteesonlytome != "0"
+                    ? owneruserid == userid
+                        ? displayinvitename()
+                        : const SizedBox()
+                    : displayinvitename(),
+                /*Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    for (var i in inviteeslist)
+                      Text('This is listview' + i.toString())
+                  ],
+                ),*/
+              ],
+            ),
           ),
         ));
 

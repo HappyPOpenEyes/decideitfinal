@@ -199,13 +199,12 @@ class _PersonalProfileState extends State<PersonalProfile> {
                                     const SizedBox(
                                       height: 5,
                                     ),
-                                    Row(
-                                      children: [
-                                        Padding(
-                                          padding: const EdgeInsets.all(
-                                            6.0,
-                                          ),
-                                          child: RaisedButton(
+                                    Padding(
+                                      padding: const EdgeInsets.only(
+                                          top: 6.0, left: 4),
+                                      child: Row(
+                                        children: [
+                                          RaisedButton(
                                               shape: RoundedRectangleBorder(
                                                 borderRadius:
                                                     BorderRadius.circular(30.0),
@@ -242,32 +241,37 @@ class _PersonalProfileState extends State<PersonalProfile> {
                                                   ],
                                                 ),
                                               )),
-                                        ),
-                                        RaisedButton(
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(30.0),
-                                            ),
-                                            color: kBluePrimaryColor,
-                                            onPressed: () {
-                                              print('Address');
-                                              Navigator.of(context)
-                                                  .pushReplacement(
-                                                      MaterialPageRoute(
-                                                          builder: (context) =>
-                                                              AddressBook(1)));
-                                            },
-                                            child: RichText(
-                                              text: const TextSpan(
-                                                  text: 'ADDRESS BOOK',
-                                                  style: TextStyle(
-                                                      color: Colors.white,
-                                                      fontSize: 10,
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      fontFamily: 'Calibri')),
-                                            ))
-                                      ],
+                                          const SizedBox(
+                                            width: 2,
+                                          ),
+                                          RaisedButton(
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(30.0),
+                                              ),
+                                              color: kBluePrimaryColor,
+                                              onPressed: () {
+                                                print('Address');
+                                                Navigator.of(context)
+                                                    .pushReplacement(
+                                                        MaterialPageRoute(
+                                                            builder:
+                                                                (context) =>
+                                                                    AddressBook(
+                                                                        1)));
+                                              },
+                                              child: RichText(
+                                                text: const TextSpan(
+                                                    text: 'ADDRESS BOOK',
+                                                    style: TextStyle(
+                                                        color: Colors.white,
+                                                        fontSize: 10,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        fontFamily: 'Calibri')),
+                                              ))
+                                        ],
+                                      ),
                                     )
                                   ],
                                 )

@@ -13,7 +13,9 @@ import 'package:decideitfinal/ProfileScreens/CommunityProfile.dart';
 import 'package:decideitfinal/ProfileScreens/PersonalProfile.dart';
 import 'package:decideitfinal/ProfileScreens/ProfilePlan.dart';
 import 'package:decideitfinal/alertDialog.dart';
+import 'package:decideitfinal/alertdialog_single.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
@@ -37,10 +39,12 @@ class AddressBook extends StatefulWidget {
 class _AddressBookState extends State<AddressBook> {
   late GoogleSignInAccount _currentUser;
   var name, email, imageurl, userid, header;
-  GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
-  TextEditingController controller = new TextEditingController();
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
+  TextEditingController controller = TextEditingController();
+  TextEditingController pagecontroller = TextEditingController();
   final List<String> errors = [];
   final _formKey = GlobalKey<FormState>();
+  final _pageFormKey = GlobalKey<FormState>();
   bool _enabled = true;
   List<String> contactname = [];
   List<String> contactemail = [];
@@ -53,29 +57,30 @@ class _AddressBookState extends State<AddressBook> {
   List<String> tempcontactaddressbookid = [];
   List<String> contactaddressbookid = [];
   List<String> _searchResult = [];
-  List<String> _searchcontactname = [];
-  List<String> _searchcontactemail = [];
-  List<String> _searchcontactphone = [];
-  List<String> _searchcontactisactive = [];
-  List<String> _searchcontactaddressbookid = [];
+  final List<String> _searchcontactname = [];
+  final List<String> _searchcontactemail = [];
+  final List<String> _searchcontactphone = [];
+  final List<String> _searchcontactisactive = [];
+  final List<String> _searchcontactaddressbookid = [];
   List<String> searchlist = [];
   List<String> groupnames = ["Choose existing group"];
   List<String> groupids = ["Demo"];
-  TextEditingController groupnamecontroller = new TextEditingController();
+  TextEditingController groupnamecontroller = TextEditingController();
   List<int> selectedindex = [];
-  List<int> _searchselectedindex = [];
+  final List<int> _searchselectedindex = [];
   List<int> showeditoptions = [];
-  List<int> _searchshoweditoptions = [];
+  final List<int> _searchshoweditoptions = [];
   late GoogleSignIn _googleSignIn;
   List<String> googlephonenumbers = [];
   List<String> googlefullname = [];
   List<String> googlefirstname = [];
   List<String> googlelastname = [];
   List<String> googleemails = [];
-  late int id;
+  late int id, totalListCount;
+  int offset = 0;
   AppBar appbar = AppBar();
   bool oneAlreadySelected = false;
-
+  String searchQuery = "";
   _AddressBookState(this.id);
 
   Future getUserContacts(int status) async {
@@ -244,6 +249,7 @@ class _AddressBookState extends State<AddressBook> {
         'https://www.googleapis.com/auth/contacts.readonly'
       ],
     );
+    pagecontroller.text = "1";
     getuserdetails();
   }
 
@@ -314,53 +320,59 @@ class _AddressBookState extends State<AddressBook> {
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child: Container(
-                child: Form(
-                  key: _formKey,
-                  child: Card(
-                    shape: const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(20))),
-                    child: ListTile(
-                      leading: const Icon(Icons.search),
-                      title: TextFormField(
-                        controller: controller,
-                        decoration: const InputDecoration(
-                            hintText: 'Search', border: InputBorder.none),
-                        //onChanged: onSearchTextChanged,
-                        onFieldSubmitted: (value) {
-                          if (_formKey.currentState!.validate()) {
-                            _formKey.currentState!.save();
-                            _enabled = true;
-                            onSearchTextChanged(value);
-                            // if all are valid then go to success screen
-                          }
-                        },
-                        onChanged: (value) {
-                          if (value.isNotEmpty) {
-                            removeError(
-                                error: 'Please enter your search keyword');
-                          }
-                        },
-                        validator: (value) {
-                          if (value!.isEmpty) {
-                            return 'Please enter your search keyword';
-                            //addError(error: kPassNullError);
-                            return "";
-                          }
-                          return null;
-                        },
-                      ),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.cancel),
-                        onPressed: () {
-                          controller.clear();
+              child: Form(
+                key: _formKey,
+                child: Card(
+                  shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(20))),
+                  child: ListTile(
+                    leading: const Icon(Icons.search),
+                    title: TextFormField(
+                      controller: controller,
+                      textInputAction: TextInputAction.go,
+                      decoration: const InputDecoration(
+                          hintText: 'Search', border: InputBorder.none),
+                      //onChanged: onSearchTextChanged,
+                      onFieldSubmitted: (value) {
+                        if (_formKey.currentState!.validate()) {
+                          _formKey.currentState!.save();
+
                           _enabled = true;
-                          clearsearchdata();
                           cleardata();
-                          getuserdetails();
-                          //onSearchTextChanged('');
-                        },
-                      ),
+                          searchQuery = value;
+                          offset = 0;
+                          pagecontroller.text = "1";
+                          getaddressbookdata();
+                          //onSearchTextChanged(value);
+                          // if all are valid then go to success screen
+                        }
+                      },
+                      onChanged: (value) {
+                        if (value.isNotEmpty) {
+                          removeError(
+                              error: 'Please enter your search keyword');
+                        }
+                      },
+                      validator: (value) {
+                        if (value!.isEmpty) {
+                          return 'Please enter your search keyword';
+                          //addError(error: kPassNullError);
+                          return "";
+                        }
+                        return null;
+                      },
+                    ),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.cancel),
+                      onPressed: () {
+                        controller.clear();
+                        _enabled = true;
+                        searchQuery = "";
+                        clearsearchdata();
+                        cleardata();
+                        getuserdetails();
+                        //onSearchTextChanged('');
+                      },
                     ),
                   ),
                 ),
@@ -397,7 +409,6 @@ class _AddressBookState extends State<AddressBook> {
                       ),
                       color: kBluePrimaryColor,
                       onPressed: () {
-                        print('ADD CONTACT');
                         Navigator.of(context).pushReplacement(MaterialPageRoute(
                             builder: (context) =>
                                 AddContact('', '', '', '', '', 0, id)));
@@ -419,7 +430,6 @@ class _AddressBookState extends State<AddressBook> {
                         ),
                         color: kBluePrimaryColor,
                         onPressed: () {
-                          print('ADD CONTACT TO GROUP');
                           addcontacttogroup();
                         },
                         child: RichText(
@@ -458,8 +468,41 @@ class _AddressBookState extends State<AddressBook> {
                             );
                           }),
                     ))
-                : controller.text.isEmpty
-                    ? ListView.builder(
+                : contactemail.isEmpty
+                    ? Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Card(
+                            shape: const RoundedRectangleBorder(
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(20))),
+                            color: kBackgroundColor,
+                            child: Column(
+                              children: [
+                                Image.asset(
+                                  'images/no_found.png',
+                                  fit: BoxFit.cover,
+                                ),
+                                const SizedBox(
+                                  height: 10,
+                                ),
+                                const Text(
+                                  'No Contacts Found For Your Selection',
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 18,
+                                      color: kBluePrimaryColor),
+                                ),
+                                const SizedBox(
+                                  height: 15,
+                                )
+                              ],
+                            ),
+                          ),
+                        ),
+                      )
+                    : ListView.builder(
                         scrollDirection: Axis.vertical,
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
@@ -470,12 +513,10 @@ class _AddressBookState extends State<AddressBook> {
                               GestureDetector(
                                   onLongPress: () {
                                     setState(() {
-                                      print('Long Press');
                                       if (selectedindex[index] == 0) {
                                         selectedindex[index] = 1;
                                       }
                                     });
-                                    print('Long Press');
                                   },
                                   onTap: () {
                                     setState(() {
@@ -486,8 +527,8 @@ class _AddressBookState extends State<AddressBook> {
                                           selectedindex[index] = 1;
                                         } else {
                                           showeditoptions[index] = 1;
+                                          oneAlreadySelected = true;
                                         }
-                                        oneAlreadySelected = true;
                                       }
                                     });
                                   },
@@ -502,127 +543,225 @@ class _AddressBookState extends State<AddressBook> {
                             ],
                           );
                         },
-                      )
-                    : _searchResult.isEmpty
-                        ? Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Container(
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Card(
-                                  shape: const RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.all(
-                                          Radius.circular(20))),
-                                  color: kBackgroundColor,
-                                  child: Column(
-                                    children: [
-                                      Image.asset(
-                                        'images/no_found.png',
-                                        fit: BoxFit.cover,
-                                      ),
-                                      const SizedBox(
-                                        height: 10,
-                                      ),
-                                      const Text(
-                                        'No Questions Found For Your Selection',
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 18,
-                                            color: kBluePrimaryColor),
-                                      ),
-                                      const SizedBox(
-                                        height: 15,
-                                      )
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                          )
-                        : ListView.builder(
-                            scrollDirection: Axis.vertical,
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: _searchcontactemail.length,
-                            itemBuilder: (context, index) {
-                              return Column(
-                                children: [
-                                  GestureDetector(
-                                    onLongPress: () {
-                                      setState(() {
-                                        print('Long Press');
-                                        if (_searchselectedindex[index] == 0) {
-                                          _searchselectedindex[index] = 1;
-                                        }
-                                      });
-                                      print('Long Press');
-                                    },
-                                    onTap: () {
-                                      setState(() {
-                                        if (_searchselectedindex[index] == 1) {
-                                          _searchselectedindex[index] = 0;
-                                        } else if (_searchselectedindex
-                                            .contains(1)) {
-                                          _searchselectedindex[index] = 1;
-                                        } else {
-                                          _searchshoweditoptions[index] = 1;
-                                        }
-                                      });
-                                    },
-                                    child: showsearchaddresscard(
-                                        _searchcontactname[index],
-                                        _searchcontactemail[index],
-                                        _searchcontactphone[index],
-                                        index),
-                                  ),
-                                  const SizedBox(
-                                    height: 5,
-                                  )
-                                ],
+                      ),
+            // : _searchResult.isEmpty
+            //     ? Padding(
+            //         padding: const EdgeInsets.all(8.0),
+            //         child: Padding(
+            //           padding: const EdgeInsets.all(8.0),
+            //           child: Card(
+            //             shape: const RoundedRectangleBorder(
+            //                 borderRadius:
+            //                     BorderRadius.all(Radius.circular(20))),
+            //             color: kBackgroundColor,
+            //             child: Column(
+            //               children: [
+            //                 Image.asset(
+            //                   'images/no_found.png',
+            //                   fit: BoxFit.cover,
+            //                 ),
+            //                 const SizedBox(
+            //                   height: 10,
+            //                 ),
+            //                 const Text(
+            //                   'No Contacts Found For Your Selection',
+            //                   style: TextStyle(
+            //                       fontWeight: FontWeight.bold,
+            //                       fontSize: 18,
+            //                       color: kBluePrimaryColor),
+            //                 ),
+            //                 const SizedBox(
+            //                   height: 15,
+            //                 )
+            //               ],
+            //             ),
+            //           ),
+            //         ),
+            //       )
+            //     : ListView.builder(
+            //         scrollDirection: Axis.vertical,
+            //         shrinkWrap: true,
+            //         physics: const NeverScrollableScrollPhysics(),
+            //         itemCount: _searchcontactemail.length,
+            //         itemBuilder: (context, index) {
+            //           return Column(
+            //             children: [
+            //               GestureDetector(
+            //                 onLongPress: () {
+            //                   setState(() {
+            //                     if (_searchselectedindex[index] == 0) {
+            //                       _searchselectedindex[index] = 1;
+            //                     }
+            //                   });
+            //                 },
+            //                 onTap: () {
+            //                   setState(() {
+            //                     if (_searchselectedindex[index] == 1) {
+            //                       _searchselectedindex[index] = 0;
+            //                     } else if (_searchselectedindex
+            //                         .contains(1)) {
+            //                       _searchselectedindex[index] = 1;
+            //                     } else {
+            //                       _searchshoweditoptions[index] = 1;
+            //                     }
+            //                   });
+            //                 },
+            //                 child: showsearchaddresscard(
+            //                     _searchcontactname[index],
+            //                     _searchcontactemail[index],
+            //                     _searchcontactphone[index],
+            //                     index),
+            //               ),
+            //               const SizedBox(
+            //                 height: 5,
+            //               )
+            //             ],
+            //           );
+            //         },
+            //       ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  InkWell(
+                      onTap: () {
+                        if (offset != 0) {
+                          setState(() {
+                            _enabled = true;
+                            offset--;
+                            pagecontroller.text = (offset + 1).toString();
+                            cleardata();
+                            getaddressbookdata();
+                          });
+                        }
+                      },
+                      child: const Icon(
+                        Icons.arrow_back_ios,
+                        color: kBluePrimaryColor,
+                      )),
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.1,
+                    child: Card(
+                      shape: const RoundedRectangleBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(10))),
+                      child: Form(
+                        key: _pageFormKey,
+                        child: TextFormField(
+                          controller: pagecontroller,
+                          keyboardType: const TextInputType.numberWithOptions(
+                              signed: true),
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
+                          textInputAction: TextInputAction.go,
+                          decoration: const InputDecoration(
+                              contentPadding: EdgeInsets.all(5),
+                              border: InputBorder.none),
+                          onFieldSubmitted: (value) {
+                            if (value.isNotEmpty &&
+                                int.parse(value) < totalListCount) {
+                              setState(() {
+                                _enabled = true;
+                                offset = int.parse(value) - 1;
+                                cleardata();
+                                getaddressbookdata();
+                              });
+                            } else {
+                              pagecontroller.text = (offset + 1).toString();
+                              BlurryDialogSingle alert = BlurryDialogSingle(
+                                  'Error',
+                                  'Your contact list has only $totalListCount pages');
+
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  var height =
+                                      MediaQuery.of(context).size.height;
+                                  var width = MediaQuery.of(context).size.width;
+                                  return alert;
+                                },
                               );
-                            },
-                          )
+                            }
+                          },
+                          onChanged: (value) {
+                            if (value.isNotEmpty &&
+                                int.parse(value) < totalListCount) {
+                              removeError(
+                                  error:
+                                      'Your contact list has only $totalListCount pages');
+                            }
+                          },
+                          validator: (value) {
+                            if (value!.isEmpty &&
+                                int.parse(value) > totalListCount) {
+                              return 'Your contact list has only $totalListCount pages';
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                    ),
+                  ),
+                  InkWell(
+                      onTap: () {
+                        setState(() {
+                          _enabled = true;
+                          offset++;
+                          pagecontroller.text = (offset + 1).toString();
+                          cleardata();
+                          getaddressbookdata();
+                        });
+                      },
+                      child: const Icon(Icons.arrow_forward_ios,
+                          color: kBluePrimaryColor)),
+                ],
+              ),
+            ),
+            const SizedBox(
+              height: 15,
+            )
           ],
         ),
       ),
     );
   }
 
-  onSearchTextChanged(String text) async {
-    if (text.isEmpty) {
-      setState(() {});
-      return;
-    } else {
-      setState(() {
-        clearsearchdata();
-        _searchResult = searchlist
-            .where(
-                (string) => string.toLowerCase().contains(text.toLowerCase()))
-            .toList();
-        print(_searchResult);
-        for (int i = 0; i < _searchResult.length; i++) {
-          for (int j = 0; j < tempcontactemail.length; j++) {
-            if (_searchResult[i] == tempcontactname[j] ||
-                _searchResult[i] == tempcontactemail[j] ||
-                _searchResult[i] == tempcontactphone[j]) {
-              _searchcontactemail.add(tempcontactemail[j]);
-              _searchcontactname.add(tempcontactname[j]);
-              _searchcontactphone.add(tempcontactphone[j]);
-              _searchcontactisactive.add(tempcontactisactive[j]);
-              _searchcontactaddressbookid.add(tempcontactaddressbookid[j]);
-              _searchselectedindex.add(0);
-              _searchshoweditoptions.add(0);
-              removetempdata(j);
-            }
-          }
-        }
-        print(_searchcontactemail.length);
-        print(_searchcontactname);
-        cleardata();
-        getuserdetails();
-      });
-    }
-  }
+  // onSearchTextChanged(String text) async {
+  //   if (text.isEmpty) {
+  //     setState(() {});
+  //     return;
+  //   } else {
+  //     setState(() {
+  //       clearsearchdata();
+  //       _searchResult = searchlist
+  //           .where(
+  //               (string) => string.toLowerCase().contains(text.toLowerCase()))
+  //           .toList();
+  //       print(_searchResult);
+  //       for (int i = 0; i < _searchResult.length; i++) {
+  //         for (int j = 0; j < tempcontactemail.length; j++) {
+  //           if (_searchResult[i] == tempcontactname[j] ||
+  //               _searchResult[i] == tempcontactemail[j] ||
+  //               _searchResult[i] == tempcontactphone[j]) {
+  //             _searchcontactemail.add(tempcontactemail[j]);
+  //             _searchcontactname.add(tempcontactname[j]);
+  //             _searchcontactphone.add(tempcontactphone[j]);
+  //             _searchcontactisactive.add(tempcontactisactive[j]);
+  //             _searchcontactaddressbookid.add(tempcontactaddressbookid[j]);
+  //             _searchselectedindex.add(0);
+  //             _searchshoweditoptions.add(0);
+  //             removetempdata(j);
+  //           }
+  //         }
+  //       }
+  //       print(_searchcontactemail.length);
+  //       print(_searchcontactname);
+  //       cleardata();
+  //       getuserdetails();
+  //     });
+  //   }
+  // }
 
   void getuserdetails() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -651,82 +790,94 @@ class _AddressBookState extends State<AddressBook> {
   void getaddressbookdata() async {
     var useridarray = [];
     useridarray.add(userid);
-    var body = {
-      "limit": 15,
-      "offset": 0,
-      "searchData": {"status": "", "searchQuery": ""},
-      "sortOrder": [
-        {"field": "id", "dir": "asc"}
-      ],
-      "user_id": useridarray
-    };
+    if (contactemail.isEmpty) {
+      var body = {
+        "limit": 15,
+        "offset": offset,
+        "searchData": {"status": "", "searchQuery": searchQuery},
+        "sortOrder": [
+          {"field": "id", "dir": "asc"}
+        ],
+        "user_id": useridarray
+      };
 
-    var response = await http.post(
-        Uri.parse('$apiurl/user-address-book/get-all'),
-        body: json.encode(body),
-        headers: {"Content-Type": "application/json", "Authorization": header},
-        encoding: Encoding.getByName("utf-8"));
+      print(body);
 
-    if (response.statusCode == 200) {
-      print(response.body);
-      AddressBookApi addressBookApi = addressBookApiFromJson(response.body);
-      List<Datums> datum = addressBookApi.data;
-      setState(() {
-        for (int i = 0; i < datum.length; i++) {
-          contactemail.add(datum[i].contactEmail ?? '');
-          if (datum[i].contactFirstName == null &&
-              datum[i].contactLastName == null) {
-            contactname.add("");
-          } else {
-            contactname.add(
-                datum[i].contactFirstName + ' ' + datum[i].contactLastName);
-            searchlist.add(
-                datum[i].contactFirstName + ' ' + datum[i].contactLastName);
+      var response = await http.post(
+          Uri.parse('$apiurl/user-address-book/get-all'),
+          body: json.encode(body),
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": header
+          },
+          encoding: Encoding.getByName("utf-8"));
+
+      if (response.statusCode == 200) {
+        print(response.body);
+        AddressBookApi addressBookApi = addressBookApiFromJson(response.body);
+        List<Datums> datum = addressBookApi.data;
+        setState(() {
+          totalListCount = ((addressBookApi.count) ~/ 15) + 1;
+
+          for (int i = 0; i < datum.length; i++) {
+            contactemail.add(datum[i].contactEmail ?? '');
+            if (datum[i].contactFirstName == null &&
+                datum[i].contactLastName == null) {
+              contactname.add("");
+            } else {
+              contactname.add(
+                  datum[i].contactFirstName + ' ' + datum[i].contactLastName);
+              searchlist.add(
+                  datum[i].contactFirstName + ' ' + datum[i].contactLastName);
+            }
+            contactisactive.add(datum[i].isActive.toString());
+            contactphone.add(datum[i].contactPhone ?? '');
+            contactaddressbookid.add(datum[i].id);
+            if (datum[i].contactEmail != null) {
+              searchlist.add(datum[i].contactEmail ?? '');
+            }
+            if (datum[i].contactPhone != null) {
+              searchlist.add(datum[i].contactPhone ?? '');
+            }
           }
-          contactisactive.add(datum[i].isActive.toString());
-          contactphone.add(datum[i].contactPhone ?? '');
-          contactaddressbookid.add(datum[i].id);
-          if (datum[i].contactEmail != null) {
-            searchlist.add(datum[i].contactEmail ?? '');
+
+          for (int i = 0; i < contactname.length; i++) {
+            tempcontactemail.add(contactemail[i]);
+            tempcontactname.add(contactname[i]);
+            tempcontactphone.add(contactphone[i]);
+            tempcontactisactive.add(contactisactive[i]);
+            tempcontactaddressbookid.add(contactaddressbookid[i]);
+            selectedindex.add(0);
+            showeditoptions.add(0);
           }
-          if (datum[i].contactPhone != null) {
-            searchlist.add(datum[i].contactPhone ?? '');
-          }
-        }
-
-        for (int i = 0; i < contactname.length; i++) {
-          tempcontactemail.add(contactemail[i]);
-          tempcontactname.add(contactname[i]);
-          tempcontactphone.add(contactphone[i]);
-          tempcontactisactive.add(contactisactive[i]);
-          tempcontactaddressbookid.add(contactaddressbookid[i]);
-          selectedindex.add(0);
-          showeditoptions.add(0);
-        }
-        _enabled = false;
-      });
-    } else {
-      print(response.statusCode);
-      print(response.body);
-    }
-
-    var groupresponse = await http.post(
-        Uri.parse('$apiurl/user-group-name/get-group'),
-        body: json.encode(body),
-        headers: {"Content-Type": "application/json", "Authorization": header},
-        encoding: Encoding.getByName("utf-8"));
-
-    if (groupresponse.statusCode == 200) {
-      print(groupresponse.body);
-      GroupDataApi groupDataApi = groupDataApiFromJson(groupresponse.body);
-      List<DatumGroup> data = groupDataApi.data;
-      for (int i = 0; i < data.length; i++) {
-        groupids.add(data[i].id);
-        groupnames.add(data[i].name);
+          _enabled = false;
+        });
+      } else {
+        print(response.statusCode);
+        print(response.body);
       }
-    } else {
-      print(groupresponse.statusCode);
-      print(groupresponse.body);
+
+      var groupresponse = await http.post(
+          Uri.parse('$apiurl/user-group-name/get-group'),
+          body: json.encode(body),
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": header
+          },
+          encoding: Encoding.getByName("utf-8"));
+
+      if (groupresponse.statusCode == 200) {
+        print(groupresponse.body);
+        GroupDataApi groupDataApi = groupDataApiFromJson(groupresponse.body);
+        List<DatumGroup> data = groupDataApi.data;
+        for (int i = 0; i < data.length; i++) {
+          groupids.add(data[i].id);
+          groupnames.add(data[i].name);
+        }
+      } else {
+        print(groupresponse.statusCode);
+        print(groupresponse.body);
+      }
     }
   }
 
@@ -823,7 +974,7 @@ class _AddressBookState extends State<AddressBook> {
             ),
             borderRadius: const BorderRadius.all(Radius.circular(20))),
         child: Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(2.0),
           child: showeditoptions[index] == 1
               ? Stack(
                   alignment: Alignment.center,
@@ -843,9 +994,9 @@ class _AddressBookState extends State<AddressBook> {
                                       : kOrangePrimaryColor.withOpacity(0.5),
                                 ),
                                 const SizedBox(
-                                  width: 10,
+                                  width: 5,
                                 ),
-                                contactname[index] == null
+                                conname.isEmpty
                                     ? Text('-',
                                         style: TextStyle(
                                             fontWeight: FontWeight.bold,
@@ -863,7 +1014,7 @@ class _AddressBookState extends State<AddressBook> {
                                                     .withOpacity(0.5)
                                                 : kBluePrimaryColor
                                                     .withOpacity(0.5),
-                                            fontSize: 18)),
+                                            fontSize: 16)),
                               ],
                             ),
                             const SizedBox(
@@ -878,9 +1029,9 @@ class _AddressBookState extends State<AddressBook> {
                                       : kOrangePrimaryColor.withOpacity(0.5),
                                 ),
                                 const SizedBox(
-                                  width: 10,
+                                  width: 5,
                                 ),
-                                conemail == null
+                                conemail.isEmpty
                                     ? Text('-',
                                         style: TextStyle(
                                             fontWeight: FontWeight.bold,
@@ -892,13 +1043,13 @@ class _AddressBookState extends State<AddressBook> {
                                             fontSize: 18))
                                     : Text(conemail,
                                         style: TextStyle(
-                                          fontSize: 18,
+                                          fontSize: 16,
                                           color: selectedindex[index] == 1
                                               ? kBackgroundColor
                                                   .withOpacity(0.5)
                                               : kBluePrimaryColor
                                                   .withOpacity(0.5),
-                                        ))
+                                        )),
                               ],
                             ),
                             const SizedBox(
@@ -913,9 +1064,9 @@ class _AddressBookState extends State<AddressBook> {
                                       : kOrangePrimaryColor.withOpacity(0.5),
                                 ),
                                 const SizedBox(
-                                  width: 10,
+                                  width: 5,
                                 ),
-                                conphone == null
+                                conphone.isEmpty
                                     ? Text('-',
                                         style: TextStyle(
                                             fontWeight: FontWeight.bold,
@@ -932,7 +1083,7 @@ class _AddressBookState extends State<AddressBook> {
                                                     .withOpacity(0.5)
                                                 : kBluePrimaryColor
                                                     .withOpacity(0.5),
-                                            fontSize: 18))
+                                            fontSize: 16))
                               ],
                             ),
                           ],
@@ -1112,7 +1263,7 @@ class _AddressBookState extends State<AddressBook> {
                               const SizedBox(
                                 width: 10,
                               ),
-                              conname == null
+                              conname.isEmpty
                                   ? Text('-',
                                       style: TextStyle(
                                           fontWeight: FontWeight.bold,
@@ -1126,7 +1277,7 @@ class _AddressBookState extends State<AddressBook> {
                                           color: selectedindex[index] == 1
                                               ? kBackgroundColor
                                               : kBluePrimaryColor,
-                                          fontSize: 18)),
+                                          fontSize: 16)),
                             ],
                           ),
                           const SizedBox(
@@ -1143,7 +1294,7 @@ class _AddressBookState extends State<AddressBook> {
                               const SizedBox(
                                 width: 10,
                               ),
-                              conemail == null
+                              conemail.isEmpty
                                   ? Text('-',
                                       style: TextStyle(
                                           fontWeight: FontWeight.bold,
@@ -1151,13 +1302,17 @@ class _AddressBookState extends State<AddressBook> {
                                               ? kBackgroundColor
                                               : kBluePrimaryColor,
                                           fontSize: 18))
-                                  : Text(conemail,
-                                      style: TextStyle(
-                                        fontSize: 18,
-                                        color: selectedindex[index] == 1
-                                            ? kBackgroundColor
-                                            : kBluePrimaryColor,
-                                      ))
+                                  : SizedBox(
+                                      width: MediaQuery.of(context).size.width *
+                                          0.75,
+                                      child: Text(conemail,
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            color: selectedindex[index] == 1
+                                                ? kBackgroundColor
+                                                : kBluePrimaryColor,
+                                          )),
+                                    )
                             ],
                           ),
                           const SizedBox(
@@ -1174,7 +1329,7 @@ class _AddressBookState extends State<AddressBook> {
                               const SizedBox(
                                 width: 10,
                               ),
-                              conphone == null
+                              conphone.isEmpty
                                   ? Text('-',
                                       style: TextStyle(
                                           fontWeight: FontWeight.bold,
@@ -1187,7 +1342,7 @@ class _AddressBookState extends State<AddressBook> {
                                           color: selectedindex[index] == 1
                                               ? kBackgroundColor
                                               : kBluePrimaryColor,
-                                          fontSize: 18))
+                                          fontSize: 16))
                             ],
                           ),
                         ],
@@ -1204,7 +1359,7 @@ class _AddressBookState extends State<AddressBook> {
       String conname, String conemail, String conphone, int index) {
     return Card(
       shape: const RoundedRectangleBorder(
-          borderRadius: const BorderRadius.all(Radius.circular(20))),
+          borderRadius: BorderRadius.all(Radius.circular(20))),
       color: _searchselectedindex[index] == 0
           ? _searchshoweditoptions[index] == 1
               ? const Color(0xFFFFFFFF).withOpacity(1)
@@ -1215,7 +1370,7 @@ class _AddressBookState extends State<AddressBook> {
             border: Border.all(
               color: const Color(0xFFF1F1F1),
             ),
-            borderRadius: const BorderRadius.all(const Radius.circular(20))),
+            borderRadius: const BorderRadius.all(Radius.circular(20))),
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: _searchshoweditoptions[index] == 1
@@ -1237,7 +1392,7 @@ class _AddressBookState extends State<AddressBook> {
                               const SizedBox(
                                 width: 10,
                               ),
-                              contactname[index] == null
+                              contactname[index].isEmpty
                                   ? Text('-',
                                       style: TextStyle(
                                           fontWeight: FontWeight.bold,
@@ -1274,7 +1429,7 @@ class _AddressBookState extends State<AddressBook> {
                               const SizedBox(
                                 width: 10,
                               ),
-                              conemail == null
+                              conemail.isEmpty
                                   ? Text('-',
                                       style: TextStyle(
                                           fontWeight: FontWeight.bold,
@@ -1309,7 +1464,7 @@ class _AddressBookState extends State<AddressBook> {
                               const SizedBox(
                                 width: 10,
                               ),
-                              conphone == null
+                              conphone.isEmpty
                                   ? Text('-',
                                       style: TextStyle(
                                           fontWeight: FontWeight.bold,
@@ -1596,16 +1751,15 @@ class _AddressBookState extends State<AddressBook> {
           children: [
             AlertDialog(
                 shape: const RoundedRectangleBorder(
-                  borderRadius:
-                      const BorderRadius.all(const Radius.circular(10)),
+                  borderRadius: BorderRadius.all(Radius.circular(10)),
                 ),
                 title: Container(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
+                  child: const Padding(
+                    padding: EdgeInsets.all(8.0),
                     child: Center(
-                      child: new Text(
+                      child: Text(
                         'Import Contacts From',
-                        style: const TextStyle(color: kBluePrimaryColor),
+                        style: TextStyle(color: kBluePrimaryColor),
                       ),
                     ),
                   ),
@@ -1677,7 +1831,7 @@ class _AddressBookState extends State<AddressBook> {
         filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
         child: AlertDialog(
             shape: const RoundedRectangleBorder(
-              borderRadius: const BorderRadius.all(const Radius.circular(10)),
+              borderRadius: BorderRadius.all(Radius.circular(10)),
             ),
             title: Container(
               child: const Icon(Icons.error),
@@ -1705,7 +1859,7 @@ class _AddressBookState extends State<AddressBook> {
                       child: RichText(
                         text: const TextSpan(
                             text: 'REPLACE ADDRESS BOOK CONTACT',
-                            style: const TextStyle(
+                            style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 15,
                                 fontWeight: FontWeight.bold,

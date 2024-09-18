@@ -115,6 +115,10 @@ class _DraftQuestionCardState extends State<DraftQuestionCard> {
                             child: Image.network(
                               '${imageapiurl + '/question/' + widget.questionid}/' +
                                   widget.imageurl,
+                              errorBuilder: (BuildContext context,
+                                  Object exception, StackTrace? stackTrace) {
+                                 return const Text('Your error widget...');
+                              },
                               fit: BoxFit.cover,
                               //height: MediaQuery.of(context).size.height * 0.1,
                               //width: MediaQuery.of(context).size.width * 0.9
@@ -264,17 +268,11 @@ class _DraftQuestionCardState extends State<DraftQuestionCard> {
 
     providedimageextensions = prefs.getStringList('imageextensions') ?? [];
     providedvideoextensions = prefs.getStringList('videoextensions') ?? [];
-    print(widget.questiontext);
-
-    print(widget.fileextension);
-    print(providedvideoextensions);
     if (providedvideoextensions.contains(widget.fileextension)) {
+      
       _controller = VideoPlayerController.network(
         '$imageapiurl/question/' + widget.questionid + '/' + widget.imageurl,
       );
-      print(widget.questiontext);
-      print(widget.questionid);
-      print(widget.imageurl);
       print(
           '$imageapiurl/question/' + widget.questionid + '/' + widget.imageurl);
 

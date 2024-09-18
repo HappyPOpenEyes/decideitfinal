@@ -26,18 +26,16 @@ class _DIStarCardState extends State<DIStarCard> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     getuserdata();
   }
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
     return GestureDetector(
       onTap: () {
-        Navigator.of(context).push(MaterialPageRoute(
-            builder: (context) => DIStarProfile(widget.userid)));
+        Navigator.of(context).pushReplacement(MaterialPageRoute(
+            builder: (context) => DIStarProfile(widget.userid, 5)));
       },
       child: Card(
         color: Colors.white.withOpacity(0.8),
@@ -64,7 +62,7 @@ class _DIStarCardState extends State<DIStarCard> {
                       color: const Color(0xFFF1F1F1),
                     ),
                     borderRadius: const BorderRadius.all(Radius.circular(20))),
-                child: widget.profileimage == null || widget.profileimage == ''
+                child: widget.profileimage.isEmpty
                     ? Image.asset(
                         'images/user.jpg',
                         fit: BoxFit.cover,
@@ -108,10 +106,7 @@ class _DIStarCardState extends State<DIStarCard> {
                             : widget.questioncount > 15
                                 ? kBluePrimaryColor
                                 : Colors.grey,
-                        onPressed: () {
-                          print('Number');
-                          print(widget.questioncount);
-                        },
+                        onPressed: () {},
                         child: Text(
                           widget.questioncount == null ||
                                   widget.questioncount == ''
@@ -151,7 +146,7 @@ class _DIStarCardState extends State<DIStarCard> {
   }
 
   void getuserdata() async {
-    if (widget.profileimage != null) {
+    if (widget.profileimage.isNotEmpty) {
       Completer<Size> completer = Completer();
       Image image = Image.network('$imageapiurl/' + widget.profileimage);
       image.image.resolve(const ImageConfiguration()).addListener(
@@ -166,8 +161,6 @@ class _DIStarCardState extends State<DIStarCard> {
           },
         ),
       );
-    } else {
-      print('Image is not there');
     }
   }
 }
